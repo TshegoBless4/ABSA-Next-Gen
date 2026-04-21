@@ -30,7 +30,7 @@ function Home() {
           confident financial decisions for the next five years.
         </p>
         <Link to="/money-snapshot" className="btn-primary">
-          Get Started →
+          Get Started 
         </Link>
       </div>
 

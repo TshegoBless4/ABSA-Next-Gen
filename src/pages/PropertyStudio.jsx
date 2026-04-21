@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 function PropertyStudio() {
   const [rent, setRent] = useState(12000);
@@ -93,6 +94,8 @@ function PropertyStudio() {
           </div>
         </div>
 
+        
+
         {/* Results Panel */}
         <div className="card">
           <h2>5-Year Comparison</h2>
@@ -121,7 +124,31 @@ function PropertyStudio() {
               )}
             </p>
           </div>
-
+{/* 5-Year Comparison Chart */}
+<div className="card" style={{ marginTop: '24px' }}>
+  <h2>5-Year Comparison Chart</h2>
+  <ResponsiveContainer width="100%" height={300}>
+    <LineChart data={(() => {
+      const data = [];
+      const monthlyDiff = monthlyBond - rent;
+      for (let year = 1; year <= 5; year++) {
+        data.push({
+          year: `Year ${year}`,
+          buying: monthlyBond * 12 * year,
+          renting: rent * 12 * year + (monthlyDiff > 0 ? monthlyDiff * 12 * year * (1 + investmentReturn / 100) : 0)
+        });
+      }
+      return data;
+    })()}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="year" />
+      <YAxis tickFormatter={(value) => `R${value/1000}k`} />
+      <Tooltip formatter={(value) => `R${value.toLocaleString()}`} />
+      <Line type="monotone" dataKey="buying" stroke="#003366" strokeWidth={3} name="Buying" />
+      <Line type="monotone" dataKey="renting" stroke="#F4A261" strokeWidth={3} name="Renting + Investing" />
+    </LineChart>
+  </ResponsiveContainer>
+</div>
           <div
             style={{
               padding: "16px",
@@ -129,7 +156,7 @@ function PropertyStudio() {
               borderRadius: "8px",
             }}
           >
-            <h3>🎯 Studio Verdict</h3>
+            <h3> Studio Verdict</h3>
             {monthlyBond - rent > 0 ? (
               <p>
                 Renting and investing the difference could leave you better off

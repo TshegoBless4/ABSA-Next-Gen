@@ -37,7 +37,7 @@ function Library() {
   return (
     <div>
       <h1>Financial Library</h1>
-      <p>Learn key financial concepts in plain English.</p>
+      <p>Learn key financial concepts.</p>
 
       <div
         style={{
