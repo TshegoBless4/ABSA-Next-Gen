@@ -2,7 +2,7 @@
   "hash": "6a72b2a8",
   "configHash": "d7c5c0cc",
   "lockfileHash": "fe5d3417",
-  "browserHash": "74ef6379",
+  "browserHash": "b481c98c",
   "optimized": {
     "react-dom/client": {
       "src": "../../node_modules/react-dom/client.js",
