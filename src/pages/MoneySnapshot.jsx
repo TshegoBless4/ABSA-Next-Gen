@@ -31,7 +31,7 @@ function MoneySnapshot() {
 
   // Prepare pie chart data (only show items with value > 0)
   const pieData = [
-    { name: 'Rent', value: userData.rent, color: 'white' },
+    { name: 'Rent', value: userData.rent, color: '#9a0416' },
     { name: 'Vehicle', value: userData.vehicleFinance, color: '#F4A261' },
     { name: 'Insurance', value: userData.insurance, color: '#00A86B' },
     { name: 'Medical Aid', value: userData.medicalAid, color: '#b60232' },
@@ -69,39 +69,102 @@ function MoneySnapshot() {
         </div>
       </div>
 
-      {/* Where It Goes - Pie Chart */}
-      <div className="card">
-        <h2>Where It Goes</h2>
-        <p style={{ fontSize: '14px', color: '#acacac', marginBottom: '16px' }}>
-          Breakdown of your monthly expenses
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-            </PieChart>
-          </ResponsiveContainer>
+      {/* TWO COLUMN LAYOUT: Pie Chart + Income & Fixed Costs Details */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+        
+        {/* Left Column: Where It Goes - Pie Chart */}
+        <div className="card">
+          <h2>Where It Goes</h2>
+          <p style={{ fontSize: '14px', color: '#acacac', marginBottom: '16px' }}>
+            Breakdown of your monthly expenses
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', fontSize: '13px',}}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', color: '#939aa5' }}>
+            ⓘ This shows where your fixed costs are going each month.
+          </p>
         </div>
-        <p style={{ marginTop: '8px', fontSize: '14px', color: '#939aa5' }}>
-          ⓘ This shows where your fixed costs are going each month.
-        </p>
+
+        {/* Right Column: Income Details + Fixed Costs Details */}
+        <div>
+          {/* Income Section */}
+          <div className="card" style={{ marginBottom: '16px' }}>
+            <h2>Income Details</h2>
+            {editMode ? (
+              <div>
+                <label>Gross Monthly Income (ZAR)</label>
+                <input
+                  type="number"
+                  name="grossMonthlyIncome"
+                  value={formData.grossMonthlyIncome}
+                  onChange={handleInputChange}
+                />
+              </div>
+            ) : (
+              <p><strong>Gross Monthly:</strong> {formatCurrency(userData.grossMonthlyIncome)}</p>
+            )}
+          </div>
+
+          {/* Fixed Costs Section */}
+          <div className="card">
+            <h2>Fixed Costs Details</h2>
+            {editMode ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div>
+                  <label>Rent</label>
+                  <input type="number" name="rent" value={formData.rent} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label>Vehicle Finance</label>
+                  <input type="number" name="vehicleFinance" value={formData.vehicleFinance} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label>Insurance</label>
+                  <input type="number" name="insurance" value={formData.insurance} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label>Medical Aid</label>
+                  <input type="number" name="medicalAid" value={formData.medicalAid} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label>Subscriptions</label>
+                  <input type="number" name="subscriptions" value={formData.subscriptions} onChange={handleInputChange} />
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                <p><strong>Rent:</strong> {formatCurrency(userData.rent)}</p>
+                <p><strong>Vehicle Finance:</strong> {formatCurrency(userData.vehicleFinance)}</p>
+                <p><strong>Insurance:</strong> {formatCurrency(userData.insurance)}</p>
+                <p><strong>Medical Aid:</strong> {formatCurrency(userData.medicalAid)}</p>
+                <p><strong>Subscriptions:</strong> {formatCurrency(userData.subscriptions)}</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Income Waterfall Chart */}
-      <div className="card">
+      <div className="card" style={{ marginBottom: '24px' }}>
         <h2>Income Breakdown</h2>
         <p style={{ fontSize: '14px', color: '#acacac', marginBottom: '16px' }}>
           From gross salary to take-home pay (ZAR)
@@ -129,62 +192,7 @@ function MoneySnapshot() {
         </p>
       </div>
 
-      {/* Income Section */}
-      <div className="card">
-        <h2>Income Details</h2>
-        {editMode ? (
-          <div>
-            <label>Gross Monthly Income (ZAR)</label>
-            <input
-              type="number"
-              name="grossMonthlyIncome"
-              value={formData.grossMonthlyIncome}
-              onChange={handleInputChange}
-            />
-          </div>
-        ) : (
-          <p><strong>Gross Monthly:</strong> {formatCurrency(userData.grossMonthlyIncome)}</p>
-        )}
-      </div>
-
-      {/* Fixed Costs Section */}
-      <div className="card">
-        <h2>Fixed Costs Details</h2>
-        {editMode ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-            <div>
-              <label>Rent</label>
-              <input type="number" name="rent" value={formData.rent} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label>Vehicle Finance</label>
-              <input type="number" name="vehicleFinance" value={formData.vehicleFinance} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label>Insurance</label>
-              <input type="number" name="insurance" value={formData.insurance} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label>Medical Aid</label>
-              <input type="number" name="medicalAid" value={formData.medicalAid} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label>Subscriptions</label>
-              <input type="number" name="subscriptions" value={formData.subscriptions} onChange={handleInputChange} />
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <p><strong>Rent:</strong> {formatCurrency(userData.rent)}</p>
-            <p><strong>Vehicle Finance:</strong> {formatCurrency(userData.vehicleFinance)}</p>
-            <p><strong>Insurance:</strong> {formatCurrency(userData.insurance)}</p>
-            <p><strong>Medical Aid:</strong> {formatCurrency(userData.medicalAid)}</p>
-            <p><strong>Subscriptions:</strong> {formatCurrency(userData.subscriptions)}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Goals Section - UPDATED WITH PROPER HORIZONTAL PROGRESS BARS */}
+      {/* Goals Section */}
       <div className="card">
         <h2>Goals Progress</h2>
         
