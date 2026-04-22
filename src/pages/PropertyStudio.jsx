@@ -144,7 +144,7 @@ function PropertyStudio() {
       <XAxis dataKey="year" />
       <YAxis tickFormatter={(value) => `R${value/1000}k`} />
       <Tooltip formatter={(value) => `R${value.toLocaleString()}`} />
-      <Line type="monotone" dataKey="buying" stroke="#003366" strokeWidth={3} name="Buying" />
+      <Line type="monotone" dataKey="buying" stroke="#b60232" strokeWidth={3} name="Buying" />
       <Line type="monotone" dataKey="renting" stroke="#F4A261" strokeWidth={3} name="Renting + Investing" />
     </LineChart>
   </ResponsiveContainer>

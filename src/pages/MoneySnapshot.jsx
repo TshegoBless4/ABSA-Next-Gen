@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { UserContext } from '../context/UserContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { AuthContext } from '../context/AuthContext';
 
 function MoneySnapshot() {
-  const { userData, updateUserData, netPay, fixedCosts, available } = useContext(UserContext);
+  const { userData, updateUserData, netPay, fixedCosts, available } = useContext(AuthContext);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState(userData);
 

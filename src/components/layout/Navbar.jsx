@@ -1,8 +1,12 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+// src/components/layout/Navbar.jsx
+import React, { useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from '../../context/AuthContext';
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -13,6 +17,11 @@ function Navbar() {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const navbarStyle = {
     position: "fixed",
@@ -39,13 +48,12 @@ function Navbar() {
     fontSize: "20px",
     fontWeight: "bold",
     textDecoration: "none",
-    //    position: 'absolute',
-    // left: 7,
   };
 
   const navStyle = {
     display: "flex",
     gap: "24px",
+    alignItems: "center",
     flexWrap: "wrap",
   };
 
@@ -59,6 +67,17 @@ function Navbar() {
   const activeStyle = {
     ...linkStyle,
     borderBottom: "3px solid #F4A261",
+  };
+
+  const logoutButtonStyle = {
+    backgroundColor: 'white',
+    color: '#b60232',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    marginLeft: '16px',
   };
 
   return (
@@ -77,6 +96,9 @@ function Navbar() {
               {link.label}
             </Link>
           ))}
+          <button onClick={handleLogout} style={logoutButtonStyle}>
+            Logout
+          </button>
         </div>
       </div>
     </nav>
