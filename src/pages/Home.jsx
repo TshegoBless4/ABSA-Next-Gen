@@ -1,5 +1,7 @@
+// src/pages/Home.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { FaChartLine, FaMap, FaFlask, FaRegLightbulb } from "react-icons/fa";
 
 function Home() {
   return (
@@ -43,8 +45,23 @@ function Home() {
           marginBottom: "48px",
         }}
       >
+        {/* Money Snapshot Card */}
         <div className="card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📊</div>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              backgroundColor: "#00336620",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px auto",
+              color: "#F4A261",
+            }}
+          >
+            <FaChartLine size={28} />
+          </div>
           <h3>Money Snapshot</h3>
           <p>
             See where you stand - income, expenses, and progress toward your
@@ -55,12 +72,27 @@ function Home() {
             className="btn-primary"
             style={{ marginTop: "16px", display: "inline-block" }}
           >
-            View Dashboard
+            View Dashboard 
           </Link>
         </div>
 
+        {/* Strategy Tracks Card */}
         <div className="card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>🗺️</div>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              backgroundColor: "#00336620",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px auto",
+              color: "#00A86B",
+            }}
+          >
+            <FaMap size={28} />
+          </div>
           <h3>Strategy Tracks</h3>
           <p>Choose a 5-year path tailored to your goals and personality.</p>
           <Link
@@ -68,12 +100,27 @@ function Home() {
             className="btn-primary"
             style={{ marginTop: "16px", display: "inline-block" }}
           >
-            Explore Tracks
+            Explore Tracks 
           </Link>
         </div>
 
+        {/* Simulation Lab Card */}
         <div className="card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>🧪</div>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              backgroundColor: "#00336620",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px auto",
+              color: "#b60232",
+            }}
+          >
+            <FaFlask size={28} />
+          </div>
           <h3>Simulation Lab</h3>
           <p>Test "what-if" scenarios and see outcomes over 3-5 years.</p>
           <Link
@@ -81,7 +128,7 @@ function Home() {
             className="btn-primary"
             style={{ marginTop: "16px", display: "inline-block" }}
           >
-            Try Simulations
+            Try Simulations 
           </Link>
         </div>
       </div>
@@ -91,7 +138,10 @@ function Home() {
         className="card"
         style={{ textAlign: "center", background: "linear-gradient(135deg, #16110d 0%, #2d2729 85%)" }}
       >
-        <h3>🇿🇦 Made for South Africans</h3>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "8px" }}>
+          <FaRegLightbulb size={20} color="#F4A261" />
+          <h3 style={{ marginBottom: "0" }}>Made for South Africans</h3>
+        </div>
         <p>SA tax brackets, property prices, retirement annuities, and more.</p>
       </div>
     </div>

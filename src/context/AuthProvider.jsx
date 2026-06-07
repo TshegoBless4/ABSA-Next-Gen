@@ -2,27 +2,48 @@
 import React, { useState } from 'react';
 import { AuthContext } from './AuthContext';
 
-// Default financial data for new users
 const getDefaultUserData = () => ({
-  grossMonthlyIncome: 65000,
-  rent: 12000,
-  vehicleFinance: 8500,
-  insurance: 2500,
-  medicalAid: 5500,
-  subscriptions: 1000,
-  emergencyFundTarget: 60000,
-  emergencyFundCurrent: 45000,
-  propertyDepositTarget: 180000,
-  propertyDepositCurrent: 28000,
-  holidayTarget: 40000,
-  holidayCurrent: 12000,
-  studentLoan: 120000,
-  creditCardDebt: 15000,
+  grossMonthlyIncome: 0,
+  bonusFrequency: 'none',
+  bonusAmount: 0,
+  rent: 0,
+  bond: 0,
+  vehicleFinance: 0,
+  insurance: 0,
+  medicalAid: 0,
+  subscriptions: 0,
+  monthlySavings: 0,
+  emergencyFundTarget: 0,
+  emergencyFundCurrent: 0,
+  propertyDepositTarget: 0,
+  propertyDepositCurrent: 0,
+  holidayTarget: 0,
+  holidayCurrent: 0,
+  studentLoan: 0,
+  creditCardDebt: 0,
+  personalLoan: 0,
+  currentSavings: 0,
+  raValue: 0,
+  investments: 0,
   selectedTrack: 'firstProperty',
   trackProgress: {
     firstProperty: {
-      milestone1: 'completed',
-      milestone2: 'in-progress',
+      milestone1: 'not-started',
+      milestone2: 'not-started',
+      milestone3: 'not-started',
+      milestone4: 'not-started',
+      milestone5: 'not-started',
+    },
+    balanced: {
+      milestone1: 'not-started',
+      milestone2: 'not-started',
+      milestone3: 'not-started',
+      milestone4: 'not-started',
+      milestone5: 'not-started',
+    },
+    aggressive: {
+      milestone1: 'not-started',
+      milestone2: 'not-started',
       milestone3: 'not-started',
       milestone4: 'not-started',
       milestone5: 'not-started',
@@ -30,19 +51,29 @@ const getDefaultUserData = () => ({
   }
 });
 
+const loadUsers = () => {
+  const storedUsers = localStorage.getItem('app_users');
+  if (storedUsers) return JSON.parse(storedUsers);
+  return [{ email: 'user@example.com', password: 'password123', data: getDefaultUserData() }];
+};
+
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userData, setUserData] = useState({});
-  
-  // Users store with their own data
-  const [users, setUsers] = useState([
-    { 
-      email: 'user@example.com', 
-      password: 'password123',
-      data: getDefaultUserData()
+  const [users, setUsers] = useState(loadUsers);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('currentUser') !== null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [userData, setUserData] = useState(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      const usersList = loadUsers();
+      const foundUser = usersList.find(u => u.email === user.email);
+      if (foundUser?.data) return foundUser.data;
     }
-  ]);
+    return getDefaultUserData();
+  });
 
   const login = (email, password) => {
     const user = users.find(u => u.email === email && u.password === password);
@@ -50,25 +81,22 @@ export function AuthProvider({ children }) {
       setIsLoggedIn(true);
       setCurrentUser({ email: user.email });
       setUserData(user.data);
+      localStorage.setItem('currentUser', JSON.stringify({ email: user.email }));
       return true;
     }
     return false;
   };
 
   const signup = (email, password) => {
-    const userExists = users.find(u => u.email === email);
-    if (userExists) {
-      return false;
-    }
-    const newUser = { 
-      email, 
-      password,
-      data: getDefaultUserData()
-    };
-    setUsers([...users, newUser]);
+    if (users.find(u => u.email === email)) return false;
+    const newUser = { email, password, data: getDefaultUserData() };
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
     setIsLoggedIn(true);
     setCurrentUser({ email });
     setUserData(newUser.data);
+    localStorage.setItem('currentUser', JSON.stringify({ email }));
+    localStorage.setItem('app_users', JSON.stringify(updatedUsers));
     return true;
   };
 
@@ -78,35 +106,64 @@ export function AuthProvider({ children }) {
       const updatedUsers = [...users];
       updatedUsers[userIndex] = { ...updatedUsers[userIndex], password: newPassword };
       setUsers(updatedUsers);
+      localStorage.setItem('app_users', JSON.stringify(updatedUsers));
       return true;
     }
     return false;
   };
 
+  const checkEmailExists = (email) => users.findIndex(u => u.email === email) !== -1;
+
   const updateUserData = (updates) => {
     const updatedData = { ...userData, ...updates };
     setUserData(updatedData);
-    
-    // Save to users array
     const userIndex = users.findIndex(u => u.email === currentUser?.email);
     if (userIndex !== -1) {
       const updatedUsers = [...users];
       updatedUsers[userIndex] = { ...updatedUsers[userIndex], data: updatedData };
       setUsers(updatedUsers);
+      localStorage.setItem('app_users', JSON.stringify(updatedUsers));
+    }
+  };
+
+  // User can cycle through statuses (not-started → in-progress → completed → not-started)
+  const updateTrackProgress = (trackName, milestone, status) => {
+    let newStatus;
+    if (status === "not-started") {
+      newStatus = "in-progress";
+    } else if (status === "in-progress") {
+      newStatus = "completed";
+    } else {
+      newStatus = "not-started";
+    }
+    
+    const updatedData = {
+      ...userData,
+      trackProgress: {
+        ...userData.trackProgress,
+        [trackName]: { ...userData.trackProgress[trackName], [milestone]: newStatus }
+      }
+    };
+    setUserData(updatedData);
+    const userIndex = users.findIndex(u => u.email === currentUser?.email);
+    if (userIndex !== -1) {
+      const updatedUsers = [...users];
+      updatedUsers[userIndex] = { ...updatedUsers[userIndex], data: updatedData };
+      setUsers(updatedUsers);
+      localStorage.setItem('app_users', JSON.stringify(updatedUsers));
     }
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
-    setUserData({});
+    setUserData(getDefaultUserData());
+    localStorage.removeItem('currentUser');
   };
 
-  // Calculations based on current user's data
   const calculateNetPay = () => {
     const gross = userData.grossMonthlyIncome || 0;
-    const taxRate = 0.25;
-    const tax = gross * taxRate;
+    const tax = gross * 0.25;
     const medicalTaxCredit = userData.medicalAid > 0 ? 400 : 0;
     return gross - tax + medicalTaxCredit;
   };
@@ -118,22 +175,11 @@ export function AuthProvider({ children }) {
   };
 
   const value = {
-    isLoggedIn,
-    currentUser,
-    userData,
-    login,
-    signup,
-    resetPassword,
-    logout,
-    updateUserData,
-    netPay: calculateNetPay(),
-    fixedCosts: calculateFixedCosts(),
+    isLoggedIn, currentUser, userData, login, signup, resetPassword, logout,
+    checkEmailExists, updateUserData, updateTrackProgress,
+    netPay: calculateNetPay(), fixedCosts: calculateFixedCosts(),
     available: calculateNetPay() - calculateFixedCosts(),
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

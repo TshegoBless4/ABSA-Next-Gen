@@ -18,11 +18,12 @@ function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  const handleLogout = () => {
+ const handleLogout = () => {
+  if (window.confirm('Are you sure you want to logout?')) {
     logout();
     navigate('/login');
-  };
-
+  }
+};
   const navbarStyle = {
     position: "fixed",
     top: 0,
