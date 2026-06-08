@@ -126,7 +126,40 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // User can cycle through statuses (not-started → in-progress → completed → not-started)
+  // DELETE a custom goal
+  const deleteGoal = (goalKey) => {
+    const updatedData = { ...userData };
+    delete updatedData[`${goalKey}Target`];
+    delete updatedData[`${goalKey}Current`];
+    setUserData(updatedData);
+    
+    const userIndex = users.findIndex(u => u.email === currentUser?.email);
+    if (userIndex !== -1) {
+      const updatedUsers = [...users];
+      updatedUsers[userIndex] = { ...updatedUsers[userIndex], data: updatedData };
+      setUsers(updatedUsers);
+      localStorage.setItem('app_users', JSON.stringify(updatedUsers));
+    }
+  };
+
+  // UPDATE a goal's target or current amount
+  const updateGoal = (goalKey, field, value) => {
+    const updatedData = { 
+      ...userData, 
+      [`${goalKey}${field === 'target' ? 'Target' : 'Current'}`]: value 
+    };
+    setUserData(updatedData);
+    
+    const userIndex = users.findIndex(u => u.email === currentUser?.email);
+    if (userIndex !== -1) {
+      const updatedUsers = [...users];
+      updatedUsers[userIndex] = { ...updatedUsers[userIndex], data: updatedData };
+      setUsers(updatedUsers);
+      localStorage.setItem('app_users', JSON.stringify(updatedUsers));
+    }
+  };
+
+  // Track progress - cycles: not-started → in-progress → completed → not-started
   const updateTrackProgress = (trackName, milestone, status) => {
     let newStatus;
     if (status === "not-started") {
@@ -175,9 +208,20 @@ export function AuthProvider({ children }) {
   };
 
   const value = {
-    isLoggedIn, currentUser, userData, login, signup, resetPassword, logout,
-    checkEmailExists, updateUserData, updateTrackProgress,
-    netPay: calculateNetPay(), fixedCosts: calculateFixedCosts(),
+    isLoggedIn,
+    currentUser,
+    userData,
+    login,
+    signup,
+    resetPassword,
+    logout,
+    checkEmailExists,
+    updateUserData,
+    updateTrackProgress,
+    deleteGoal,
+    updateGoal,
+    netPay: calculateNetPay(),
+    fixedCosts: calculateFixedCosts(),
     available: calculateNetPay() - calculateFixedCosts(),
   };
 

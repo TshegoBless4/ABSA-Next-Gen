@@ -2,10 +2,11 @@
 import React, { useContext, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
-import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaCar, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaCar, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus, FaTrash, FaPen } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 function MoneySnapshot() {
-  const { userData, updateUserData, netPay, fixedCosts, available } = useContext(AuthContext);
+  const { userData, updateUserData, netPay, fixedCosts, available, deleteGoal, updateGoal } = useContext(AuthContext);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState(userData);
   const [dismissedNudges, setDismissedNudges] = useState(() => {
@@ -42,12 +43,90 @@ function MoneySnapshot() {
   const addGoal = () => {
     if (newGoal.name && newGoal.target > 0) {
       const goalKey = newGoal.name.toLowerCase().replace(/\s/g, '');
-      const updatedData = { ...userData, [`${goalKey}Target`]: newGoal.target, [`${goalKey}Current`]: newGoal.current };
+      const updatedData = { 
+        ...userData, 
+        [`${goalKey}Target`]: newGoal.target, 
+        [`${goalKey}Current`]: newGoal.current 
+      };
       updateUserData(updatedData);
       setNewGoal({ name: '', target: 0, current: 0 });
-      setShowAddGoal(false);
     }
   };
+
+  const editGoalValue = (goalKey, field, currentValue) => {
+    const newValue = prompt(`Enter new ${field === 'target' ? 'target amount' : 'current savings'} (R):`, currentValue);
+    if (newValue && !isNaN(newValue) && parseFloat(newValue) >= 0) {
+      updateGoal(goalKey, field, parseFloat(newValue));
+    }
+  };
+
+  const getCustomGoals = () => {
+    const goals = [];
+    const reserved = ['emergencyFund', 'propertyDeposit', 'holiday'];
+    
+    Object.keys(userData).forEach(key => {
+      if (key.endsWith('Target')) {
+        const baseName = key.replace('Target', '');
+        if (reserved.includes(baseName)) return;
+        
+        const currentKey = baseName + 'Current';
+        const goalName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+        
+        if (userData[key] > 0 || (userData[currentKey] || 0) > 0) {
+          goals.push({
+            name: goalName,
+            current: userData[currentKey] || 0,
+            target: userData[key],
+            color: '#0f65c9',
+            key: baseName,
+            isCustom: true,
+            description: 'Your custom savings goal',
+            trackLink: null,
+            trackName: null
+          });
+        }
+      }
+    });
+    return goals;
+  };
+
+  const defaultGoals = [
+    { 
+      name: 'Emergency Fund', 
+      current: userData.emergencyFundCurrent, 
+      target: userData.emergencyFundTarget, 
+      color: '#00A86B', 
+      key: 'emergencyFund', 
+      isCustom: false, 
+      description: '3-6 months of living expenses for unexpected events',
+      trackLink: '/tracks/balanced',
+      trackName: 'Balanced Track'
+    },
+    { 
+      name: 'Property Deposit', 
+      current: userData.propertyDepositCurrent, 
+      target: userData.propertyDepositTarget, 
+      color: '#ff780f', 
+      key: 'propertyDeposit', 
+      isCustom: false, 
+      description: 'Save for your first home deposit',
+      trackLink: '/tracks/first-property',
+      trackName: 'First Property Track'
+    },
+    { 
+      name: 'Holiday Fund', 
+      current: userData.holidayCurrent, 
+      target: userData.holidayTarget, 
+      color: '#b60232', 
+      key: 'holiday', 
+      isCustom: false, 
+      description: 'Save for your next vacation',
+      trackLink: null,
+      trackName: null
+    },
+  ];
+
+  const allGoals = [...defaultGoals, ...getCustomGoals()].filter(goal => goal.target > 0 || goal.current > 0);
 
   const totalDebt = userData.creditCardDebt + userData.studentLoan;
   const hasDebt = totalDebt > 0;
@@ -60,8 +139,6 @@ function MoneySnapshot() {
   const mobilityCost = (userData.vehicleFinance || 0) + fuelCost;
   const lifestyleCost = (userData.subscriptions || 0) + (userData.insurance || 0);
   const estimatedMonthlyDebtPayment = hasDebt ? Math.max(500, totalDebt / 36) : 0;
-  
-  // FIXED: Monthly savings comes from user input, not calculated from goals
   const monthlySavings = userData.monthlySavings || 0;
 
   const pieData = [
@@ -73,7 +150,6 @@ function MoneySnapshot() {
   ];
 
   const savingsRate = netPay > 0 ? (monthlySavings / netPay) * 100 : 0;
-
   const lifestylePercentage = netPay > 0 ? (lifestyleCost / netPay) * 100 : 0;
   
   const getLifestyleRating = () => {
@@ -112,7 +188,7 @@ function MoneySnapshot() {
 
   const getSavingsNudge = () => {
     if (!netPay || netPay <= 0) return null;
-    if (savingsRate === 0) return 'You are not saving anything. Click "Add Goal" below to start saving!';
+    if (savingsRate === 0) return 'You are not saving anything. Click "Add Goal" to start saving!';
     if (savingsRate < 10) return `Your savings rate is ${savingsRate.toFixed(0)}%. Aim for 15-20%.`;
     return null;
   };
@@ -122,12 +198,6 @@ function MoneySnapshot() {
     if (debtToIncomeRatio > 40) return `Your debt-to-income ratio is ${debtToIncomeRatio.toFixed(0)}%. Consider accelerating debt payments.`;
     return null;
   };
-
-  const customGoals = [
-    { name: 'Emergency Fund', current: userData.emergencyFundCurrent, target: userData.emergencyFundTarget, color: '#00A86B' },
-    { name: 'Property Deposit', current: userData.propertyDepositCurrent, target: userData.propertyDepositTarget, color: '#ff780f' },
-    { name: 'Holiday Fund', current: userData.holidayCurrent, target: userData.holidayTarget, color: '#b60232' },
-  ].filter(goal => goal.target > 0 || goal.current > 0);
 
   return (
     <div>
@@ -318,29 +388,73 @@ function MoneySnapshot() {
             <h3 style={{ marginBottom: '12px', fontSize: '16px' }}>Create New Goal</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
               <div><label>Goal Name</label><input type="text" placeholder="e.g., Car Fund" value={newGoal.name} onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })} /></div>
-              <div><label>Target Amount (R)</label><input type="number" placeholder="R50,000" value={newGoal.target} onChange={(e) => setNewGoal({ ...newGoal, target: parseFloat(e.target.value) || 0 })} min="0" /></div>
-              <div><label>Current Savings (R)</label><input type="number" placeholder="R0" value={newGoal.current} onChange={(e) => setNewGoal({ ...newGoal, current: parseFloat(e.target.value) || 0 })} min="0" /></div>
-              <button onClick={addGoal} className="btn-primary" style={{ padding: '10px 20px' }}>Add</button>
+              <div><label>Target Amount (R)</label><input type="number" placeholder="R50,000" value={newGoal.target || ''} onChange={(e) => setNewGoal({ ...newGoal, target: parseFloat(e.target.value) || 0 })} min="0" /></div>
+              <div><label>Current Savings (R)</label><input type="number" placeholder="R0" value={newGoal.current || ''} onChange={(e) => setNewGoal({ ...newGoal, current: parseFloat(e.target.value) || 0 })} min="0" /></div>
+              <button onClick={addGoal} className="btn-primary" style={{ padding: '10px 20px' }}>Add Goal</button>
             </div>
+            <button onClick={() => setShowAddGoal(false)} className="btn-secondary" style={{ marginTop: '12px', padding: '6px 12px', fontSize: '12px' }}>Cancel</button>
           </div>
         )}
 
-        {customGoals.length === 0 ? (
+        {allGoals.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#acacac' }}>
             <FaPiggyBank size={40} style={{ marginBottom: '16px', opacity: 0.5 }} />
             <p>You haven't set any goals yet.</p>
             <p style={{ fontSize: '12px', marginTop: '8px' }}>Click "Add Goal" to start saving for something important!</p>
           </div>
         ) : (
-          customGoals.map((goal) => (
-            <div key={goal.name} style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span>{goal.name}</span>
-                <span>{formatCurrency(goal.current)} / {formatCurrency(goal.target)}</span>
+          allGoals.map((goal) => (
+            <div key={goal.name} style={{ marginBottom: '24px', borderBottom: '1px solid #333', paddingBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <h3 style={{ marginBottom: '4px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {goal.name}
+                    {goal.trackLink && (
+                      <Link to={goal.trackLink} style={{ fontSize: '10px', color: '#F4A261', textDecoration: 'none' }}>
+                        → Used in {goal.trackName}
+                      </Link>
+                    )}
+                  </h3>
+                  <p style={{ fontSize: '11px', color: '#acacac' }}>{goal.description}</p>
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => editGoalValue(goal.key, 'target', goal.target)}
+                    style={{ background: 'none', border: 'none', color: '#F4A261', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                  >
+                    <FaPen size={12} /> Edit Target
+                  </button>
+                  <button 
+                    onClick={() => editGoalValue(goal.key, 'current', goal.current)}
+                    style={{ background: 'none', border: 'none', color: '#00A86B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                  >
+                    <FaPen size={12} /> Edit Savings
+                  </button>
+                  {goal.isCustom && (
+                    <button 
+                      onClick={() => {
+                        if (window.confirm(`Delete "${goal.name}" goal?`)) {
+                          deleteGoal(goal.key);
+                        }
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#b60232', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <FaTrash size={12} /> Delete
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="progress-bar-container">
-                <div className="progress-bar" style={{ width: `${getProgressPercentage(goal.current, goal.target)}%`, backgroundColor: goal.color }}></div>
+              
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '13px' }}>Progress</span>
+                  <span style={{ fontSize: '13px' }}>{formatCurrency(goal.current)} / {formatCurrency(goal.target)}</span>
+                </div>
+                <div className="progress-bar-container">
+                  <div className="progress-bar" style={{ width: `${getProgressPercentage(goal.current, goal.target)}%`, backgroundColor: goal.color }}></div>
+                </div>
               </div>
+              
               {getProgressPercentage(goal.current, goal.target) >= 75 && !dismissedNudges.includes(goal.name) && (
                 <div style={{ marginTop: '8px', padding: '8px', backgroundColor: `${goal.color}20`, borderRadius: '8px', display: 'flex', justifyContent: 'space-between' }}>
                   <span>75% achieved! Keep going!</span>

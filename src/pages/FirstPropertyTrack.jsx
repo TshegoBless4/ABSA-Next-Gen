@@ -1,5 +1,5 @@
 // src/pages/FirstPropertyTrack.jsx
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from '../context/AuthContext';
 import { Link } from "react-router-dom";
 import { FaHome, FaChartLine, FaCreditCard, FaFileSignature, FaSearch, FaCheckCircle, FaSpinner, FaCircle, FaInfoCircle, FaExclamationTriangle, FaMapMarker, FaLightbulb, FaQuestionCircle } from "react-icons/fa";
@@ -8,10 +8,32 @@ function FirstPropertyTrack() {
   const { userData, updateTrackProgress, netPay } = useContext(AuthContext);
   const progress = userData.trackProgress.firstProperty;
   const [showTips, setShowTips] = useState({});
-  // const [showDataSource, setShowDataSource] = useState(false);
 
   const hasValidIncome = userData.grossMonthlyIncome > 0;
   const hasValidNetPay = netPay > 0;
+
+  // FIXED: Get deposit data - checks multiple possible key formats
+  const getDepositData = () => {
+    // Try different possible key formats
+    const target = userData.propertyDepositTarget || 
+                   userData.propertydepositTarget || 
+                   userData.propertyDeposit?.target || 0;
+    const current = userData.propertyDepositCurrent || 
+                    userData.propertydepositCurrent || 
+                    userData.propertyDeposit?.current || 0;
+    return { target, current };
+  };
+
+  const depositData = getDepositData();
+  const depositSaved = depositData.current;
+  const depositTarget = depositData.target;
+  const depositProgress = depositTarget > 0 ? Math.min((depositSaved / depositTarget) * 100, 100) : 0;
+
+  // Debug log
+  useEffect(() => {
+    console.log('FirstPropertyTrack - Deposit Data:', { depositSaved, depositTarget, depositProgress });
+    console.log('Full userData keys:', Object.keys(userData));
+  }, [userData]);
 
   const milestones = [
     { id: "milestone1", name: "Build Deposit Fund", year: "Year 1", targetDate: "December 2025", icon: <FaHome />, description: "Save for your property deposit", tip: "Open a TFSA for tax-free growth. Aim for 10-20% of property value." },
@@ -55,13 +77,9 @@ function FirstPropertyTrack() {
   const maxAffordableBond = hasValidNetPay ? netPay * 0.3 : 0;
   const estimatedPropertyPrice = maxAffordableBond > 0 ? maxAffordableBond / 0.009 : 0;
 
-  const depositSaved = userData.propertyDepositCurrent || 0;
-  const depositTarget = userData.propertyDepositTarget || 0;
-  const depositProgress = depositTarget > 0 ? Math.min((depositSaved / depositTarget) * 100, 100) : 0;
-
   return (
     <div>
-      {/* DATA SOURCE CARD - EXPLAINS WHERE NUMBERS COME FROM */}
+      {/* DATA SOURCE CARD */}
       <div className="card" style={{ marginBottom: '24px', backgroundColor: '#00336620', borderLeft: '4px solid #F4A261' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

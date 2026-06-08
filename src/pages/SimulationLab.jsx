@@ -1,7 +1,7 @@
 // src/pages/SimulationLab.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaHome, FaCar, FaGlobe, FaCalculator, FaInfoCircle, FaChartLine } from "react-icons/fa";
+import { FaHome, FaCar, FaGlobe, FaInfoCircle, FaChartLine } from "react-icons/fa";
 
 function SimulationLab() {
   const [selectedStudio, setSelectedStudio] = useState(null);
@@ -44,19 +44,16 @@ function SimulationLab() {
 
   return (
     <div>
-      {/* Header */}
+      {/* Header - Fixed: removed icon to match MoneySnapshot and Tracks */}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <FaCalculator size={28} color="#F4A261" />
-          <h1 style={{ marginBottom: '0' }}>Simulation Lab</h1>
-        </div>
+        <h1 style={{ marginBottom: '8px' }}>Simulation Lab</h1>
         <p style={{ color: '#acacac', fontSize: '16px' }}>
           Test "what-if" scenarios and see outcomes over 3-5 years. Each studio provides interactive sliders,
           real-time calculations, and a personalized verdict based on your inputs.
         </p>
       </div>
 
-      {/* Studio Cards - Added hover effects and click highlighting */}
+      {/* Studio Cards - Original 3-column grid layout preserved */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
         {studios.map((studio) => (
           <div 
@@ -104,10 +101,10 @@ function SimulationLab() {
                 {studio.whatIf}
               </p>
               <p style={{ fontSize: '11px', color: '#acacac', marginTop: '6px' }}>
-                ⏱Time horizon: {studio.timeHorizon}
+                Time horizon: {studio.timeHorizon}
               </p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>
-                🇿🇦 SA context: {studio.saContext}
+                SA context: {studio.saContext}
               </p>
             </div>
             
@@ -117,7 +114,7 @@ function SimulationLab() {
               style={{ display: 'block', textAlign: 'center' }}
               onClick={(e) => e.stopPropagation()}
             >
-              Try Now 
+              Try Now →
             </Link>
           </div>
         ))}

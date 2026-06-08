@@ -1,5 +1,5 @@
 // src/pages/BalancedTrack.jsx
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { FaBalanceScale, FaChartLine, FaPiggyBank, FaGlobe, FaCheckCircle, FaSpinner, FaCircle, FaInfoCircle, FaMapMarker, FaLightbulb, FaExclamationTriangle, FaPercent, FaQuestionCircle } from "react-icons/fa";
@@ -12,6 +12,16 @@ function BalancedTrack() {
   const [showTips, setShowTips] = useState({});
 
   const hasValidIncome = userData.grossMonthlyIncome > 0;
+
+  // FIXED: Get emergency fund data - checks both key formats
+  const getEmergencyFundData = () => {
+    const target = userData.emergencyFundTarget || userData.emergencyfundTarget || 0;
+    const current = userData.emergencyFundCurrent || userData.emergencyfundCurrent || 0;
+    return { target, current };
+  };
+
+  const emergencyData = getEmergencyFundData();
+  const emergencyProgress = emergencyData.target > 0 ? Math.min((emergencyData.current / emergencyData.target) * 100, 100) : 0;
 
   const milestones = [
     { id: "milestone1", name: "Build Emergency Fund", year: "Year 1", targetDate: "December 2025", icon: <FaPiggyBank />, description: "Save 3-6 months of living expenses", tip: "Keep emergency fund in a high-interest savings account." },
@@ -45,13 +55,11 @@ function BalancedTrack() {
 
   const formatCurrency = (amount) => new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", minimumFractionDigits: 0 }).format(amount);
 
-  const emergencyProgress = userData.emergencyFundTarget > 0 ? Math.min((userData.emergencyFundCurrent / userData.emergencyFundTarget) * 100, 100) : 0;
   const investmentProgress = 300000 > 0 ? Math.min(((userData.investments || 0) / 300000) * 100, 100) : 0;
   const completedCount = milestones.filter(m => progress[m.id] === "completed").length;
   const overallProgress = (completedCount / milestones.length) * 100;
   const nextMilestone = milestones.find(m => progress[m.id] !== "completed");
 
-  // 50/30/20 Rule - EXPLAIN WHERE EACH COMES FROM
   const fiftyPercent = netPay * 0.5;
   const thirtyPercent = netPay * 0.3;
   const twentyPercent = netPay * 0.2;
@@ -61,7 +69,7 @@ function BalancedTrack() {
 
   return (
     <div>
-      {/* DATA SOURCE CARD - EXPLAINS WHERE NUMBERS COME FROM */}
+      {/* DATA SOURCE CARD */}
       <div className="card" style={{ marginBottom: '24px', backgroundColor: '#00336620', borderLeft: '4px solid #00A86B' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -124,7 +132,7 @@ function BalancedTrack() {
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
           <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#00A86B' }}>{Math.round(emergencyProgress)}%</p>
           <p style={{ fontSize: '11px', color: '#acacac' }}>Emergency Fund</p>
-          {userData.emergencyFundTarget === 0 && <p style={{ fontSize: '9px', color: '#acacac' }}>Set goal in Money Snapshot</p>}
+          {emergencyData.target === 0 && <p style={{ fontSize: '9px', color: '#acacac' }}>Set goal in Money Snapshot</p>}
         </div>
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
           <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#00A86B' }}>{Math.round(investmentProgress)}%</p>
