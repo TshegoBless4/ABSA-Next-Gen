@@ -36,11 +36,11 @@ function FirstPropertyTrack() {
   }, [userData]);
 
   const milestones = [
-    { id: "milestone1", name: "Build Deposit Fund", year: "Year 1", targetDate: "December 2025", icon: <FaHome />, description: "Save for your property deposit", tip: "Open a TFSA for tax-free growth. Aim for 10-20% of property value." },
-    { id: "milestone2", name: "Clear Negative Debt", year: "Year 2", targetDate: "December 2026", icon: <FaCreditCard />, description: "Pay off credit cards and loans", tip: "Focus on high-interest debt first." },
-    { id: "milestone3", name: "Bond Pre-Approval", year: "Year 3", targetDate: "December 2027", icon: <FaFileSignature />, description: "Get pre-approved for a home loan", tip: "Get pre-approved from 3 different banks to compare rates." },
-    { id: "milestone4", name: "View Properties", year: "Year 4", targetDate: "December 2028", icon: <FaSearch />, description: "View properties in your target area", tip: "View at least 15 properties. Take notes and photos." },
-    { id: "milestone5", name: "Offer Accepted", year: "Year 5", targetDate: "December 2029", icon: <FaCheckCircle />, description: "Submit offer and complete transfer", tip: "Budget for transfer duty (~R46k), bond fees (~R30k)." },
+    { id: "milestone1", name: "Build Deposit Fund", year: "Year 1", targetDate: "December 2026", icon: <FaHome />, description: "Save for your property deposit", tip: "Open a TFSA for tax-free growth. Aim for 10-20% of property value." },
+    { id: "milestone2", name: "Clear Negative Debt", year: "Year 2", targetDate: "December 2027", icon: <FaCreditCard />, description: "Pay off credit cards and loans", tip: "Focus on high-interest debt first." },
+    { id: "milestone3", name: "Bond Pre-Approval", year: "Year 3", targetDate: "December 2028", icon: <FaFileSignature />, description: "Get pre-approved for a home loan", tip: "Get pre-approved from 3 different banks to compare rates." },
+    { id: "milestone4", name: "View Properties", year: "Year 4", targetDate: "December 2029", icon: <FaSearch />, description: "View properties in your target area", tip: "View at least 15 properties. Take notes and photos." },
+    { id: "milestone5", name: "Offer Accepted", year: "Year 5", targetDate: "December 2030", icon: <FaCheckCircle />, description: "Submit offer and complete transfer", tip: "Budget for transfer duty (~R46k), bond fees (~R30k)." },
   ];
 
   const toggleTip = (id) => setShowTips(prev => ({ ...prev, [id]: !prev[id] }));

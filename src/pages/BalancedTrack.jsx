@@ -24,11 +24,11 @@ function BalancedTrack() {
   const emergencyProgress = emergencyData.target > 0 ? Math.min((emergencyData.current / emergencyData.target) * 100, 100) : 0;
 
   const milestones = [
-    { id: "milestone1", name: "Build Emergency Fund", year: "Year 1", targetDate: "December 2025", icon: <FaPiggyBank />, description: "Save 3-6 months of living expenses", tip: "Keep emergency fund in a high-interest savings account." },
-    { id: "milestone2", name: "Start Investing", year: "Year 2", targetDate: "December 2026", icon: <FaChartLine />, description: "Open TFSA and start monthly contributions", tip: "Max out TFSA first (R46,000/year) - all growth is tax-free!" },
-    { id: "milestone3", name: "Diversify Portfolio", year: "Year 3", targetDate: "December 2027", icon: <FaGlobe />, description: "Add offshore exposure", tip: "Open EasyEquities USD account. Aim for 30-40% offshore allocation." },
-    { id: "milestone4", name: "Grow Investments", year: "Year 4", targetDate: "December 2028", icon: <FaBalanceScale />, description: "Reach R300,000+ portfolio", tip: "Rebalance annually. Consider a Retirement Annuity." },
-    { id: "milestone5", name: "Passive Income", year: "Year 5", targetDate: "December 2029", icon: <FaPercent />, description: "Generate passive income", tip: "Aim for dividend-paying ETFs or property REITs." },
+    { id: "milestone1", name: "Build Emergency Fund", year: "Year 1", targetDate: "December 2026", icon: <FaPiggyBank />, description: "Save 3-6 months of living expenses", tip: "Keep emergency fund in a high-interest savings account." },
+    { id: "milestone2", name: "Start Investing", year: "Year 2", targetDate: "December 2027", icon: <FaChartLine />, description: "Open TFSA and start monthly contributions", tip: "Max out TFSA first (R46,000/year) - all growth is tax-free!" },
+    { id: "milestone3", name: "Diversify Portfolio", year: "Year 3", targetDate: "December 2028", icon: <FaGlobe />, description: "Add offshore exposure", tip: "Open EasyEquities USD account. Aim for 30-40% offshore allocation." },
+    { id: "milestone4", name: "Grow Investments", year: "Year 4", targetDate: "December 2029", icon: <FaBalanceScale />, description: "Reach R300,000+ portfolio", tip: "Rebalance annually. Consider a Retirement Annuity." },
+    { id: "milestone5", name: "Passive Income", year: "Year 5", targetDate: "December 2030", icon: <FaPercent />, description: "Generate passive income", tip: "Aim for dividend-paying ETFs or property REITs." },
   ];
 
   const toggleTip = (id) => setShowTips(prev => ({ ...prev, [id]: !prev[id] }));
