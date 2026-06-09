@@ -44,7 +44,7 @@ function SimulationLab() {
 
   return (
     <div>
-      {/* Header - Fixed: removed icon to match MoneySnapshot and Tracks */}
+      {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ marginBottom: '8px' }}>Simulation Lab</h1>
         <p style={{ color: '#acacac', fontSize: '16px' }}>
@@ -53,7 +53,7 @@ function SimulationLab() {
         </p>
       </div>
 
-      {/* Studio Cards - Original 3-column grid layout preserved */}
+      {/* Studio Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
         {studios.map((studio) => (
           <div 
@@ -65,7 +65,9 @@ function SimulationLab() {
               borderTop: `4px solid ${studio.color}`,
               transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               cursor: 'pointer',
-              border: selectedStudio === studio.id ? `2px solid ${studio.color}` : 'none'
+              border: selectedStudio === studio.id ? `2px solid ${studio.color}` : 'none',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onMouseEnter={(e) => { 
               e.currentTarget.style.transform = 'translateY(-4px)'; 
@@ -92,7 +94,7 @@ function SimulationLab() {
             </div>
             
             <h2 style={{ fontSize: '20px', marginBottom: '8px' }}>{studio.title}</h2>
-            <p style={{ color: '#acacac', fontSize: '14px', marginBottom: '16px' }}>{studio.description}</p>
+            <p style={{ color: '#acacac', fontSize: '14px', marginBottom: '16px', flex: 1 }}>{studio.description}</p>
             
             {/* Studio Details Box */}
             <div style={{ backgroundColor: '#2d2729', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
@@ -111,10 +113,10 @@ function SimulationLab() {
             <Link 
               to={studio.path} 
               className="btn-primary" 
-              style={{ display: 'block', textAlign: 'center' }}
+              style={{ display: 'block', textAlign: 'center', marginTop: 'auto' }}
               onClick={(e) => e.stopPropagation()}
             >
-              Try Now →
+              Try Now 
             </Link>
           </div>
         ))}

@@ -71,7 +71,7 @@ function AggressiveTrack() {
             </div>
           </div>
           <Link to="/money-snapshot" className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>
-            Update in Money Snapshot →
+            Update in Money Snapshot 
           </Link>
         </div>
       </div>

@@ -46,90 +46,102 @@ function Home() {
         }}
       >
         {/* Money Snapshot Card */}
-        <div className="card" style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              backgroundColor: "#00336620",
-              borderRadius: "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px auto",
-              color: "#F4A261",
-            }}
-          >
-            <FaChartLine size={28} />
+        <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                backgroundColor: "#00336620",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px auto",
+                color: "#F4A261",
+              }}
+            >
+              <FaChartLine size={28} />
+            </div>
+            <h3>Money Snapshot</h3>
+            <p>
+              See where you stand - income, expenses, and progress toward your
+              goals.
+            </p>
           </div>
-          <h3>Money Snapshot</h3>
-          <p>
-            See where you stand - income, expenses, and progress toward your
-            goals.
-          </p>
-          <Link
-            to="/money-snapshot"
-            className="btn-primary"
-            style={{ marginTop: "16px", display: "inline-block" }}
-          >
-            View Dashboard 
-          </Link>
+          <div>
+            <Link
+              to="/money-snapshot"
+              className="btn-primary"
+              style={{ marginTop: "16px", display: "inline-block" }}
+            >
+              View Dashboard 
+            </Link>
+          </div>
         </div>
 
         {/* Strategy Tracks Card */}
-        <div className="card" style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              backgroundColor: "#00336620",
-              borderRadius: "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px auto",
-              color: "#00A86B",
-            }}
-          >
-            <FaMap size={28} />
+        <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                backgroundColor: "#00336620",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px auto",
+                color: "#00A86B",
+              }}
+            >
+              <FaMap size={28} />
+            </div>
+            <h3>Strategy Tracks</h3>
+            <p>Choose a 5-year path tailored to your goals and personality.</p>
           </div>
-          <h3>Strategy Tracks</h3>
-          <p>Choose a 5-year path tailored to your goals and personality.</p>
-          <Link
-            to="/tracks"
-            className="btn-primary"
-            style={{ marginTop: "16px", display: "inline-block" }}
-          >
-            Explore Tracks 
-          </Link>
+          <div>
+            <Link
+              to="/tracks"
+              className="btn-primary"
+              style={{ marginTop: "16px", display: "inline-block" }}
+            >
+              Explore Tracks 
+            </Link>
+          </div>
         </div>
 
         {/* Simulation Lab Card */}
-        <div className="card" style={{ textAlign: "center" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              backgroundColor: "#00336620",
-              borderRadius: "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px auto",
-              color: "#b60232",
-            }}
-          >
-            <FaFlask size={28} />
+        <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                backgroundColor: "#00336620",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px auto",
+                color: "#b60232",
+              }}
+            >
+              <FaFlask size={28} />
+            </div>
+            <h3>Simulation Lab</h3>
+            <p>Test "what-if" scenarios and see outcomes over 3-5 years.</p>
           </div>
-          <h3>Simulation Lab</h3>
-          <p>Test "what-if" scenarios and see outcomes over 3-5 years.</p>
-          <Link
-            to="/simulation-lab"
-            className="btn-primary"
-            style={{ marginTop: "16px", display: "inline-block" }}
-          >
-            Try Simulations 
-          </Link>
+          <div>
+            <Link
+              to="/simulation-lab"
+              className="btn-primary"
+              style={{ marginTop: "16px", display: "inline-block" }}
+            >
+              Try Simulations 
+            </Link>
+          </div>
         </div>
       </div>
 

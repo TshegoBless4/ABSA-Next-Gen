@@ -88,7 +88,7 @@ function BalancedTrack() {
             </div>
           </div>
           <Link to="/money-snapshot" className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>
-            Update in Money Snapshot →
+            Update in Money Snapshot 
           </Link>
         </div>
       </div>
@@ -209,7 +209,7 @@ function BalancedTrack() {
           <p style={{ fontWeight: 'bold' }}>{nextMilestone.name}</p>
           <p style={{ fontSize: '13px', color: '#acacac' }}>{nextMilestone.description}</p>
           <p style={{ fontSize: '11px', color: '#acacac', marginTop: '8px' }}>Target: {nextMilestone.targetDate}</p>
-          <button className="btn-primary" style={{ marginTop: '12px' }} onClick={() => { if (nextMilestone && progress[nextMilestone.id] === "not-started") handleStatusChange(nextMilestone.id, "not-started"); }}>Start Milestone →</button>
+          <button className="btn-primary" style={{ marginTop: '12px' }} onClick={() => { if (nextMilestone && progress[nextMilestone.id] === "not-started") handleStatusChange(nextMilestone.id, "not-started"); }}>Start Milestone </button>
         </div>
       )}
 

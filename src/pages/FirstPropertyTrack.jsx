@@ -95,7 +95,7 @@ function FirstPropertyTrack() {
             </div>
           </div>
           <Link to="/money-snapshot" className="btn-secondary" style={{ padding: '6px 12px', fontSize: '11px' }}>
-            Update in Money Snapshot →
+            Update in Money Snapshot 
           </Link>
         </div>
       </div>
@@ -200,7 +200,7 @@ function FirstPropertyTrack() {
           <p style={{ fontSize: '13px', color: '#acacac' }}>{nextMilestone.description}</p>
           <p style={{ fontSize: '11px', color: '#acacac', marginTop: '8px' }}>Target: {nextMilestone.targetDate}</p>
           <button className="btn-primary" style={{ marginTop: '12px' }} onClick={() => handleStatusChange(nextMilestone.id, progress[nextMilestone.id])}>
-            {progress[nextMilestone.id] === "not-started" ? "Start Milestone →" : "Update Progress →"}
+            {progress[nextMilestone.id] === "not-started" ? "Start Milestone " : "Update Progress →"}
           </button>
         </div>
       )}

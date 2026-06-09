@@ -2,7 +2,7 @@
 import React, { useContext, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
-import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaCar, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus, FaTrash, FaPen } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus, FaTrash, FaPen } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 function MoneySnapshot() {
@@ -128,8 +128,12 @@ function MoneySnapshot() {
 
   const allGoals = [...defaultGoals, ...getCustomGoals()].filter(goal => goal.target > 0 || goal.current > 0);
 
-  const totalDebt = userData.creditCardDebt + userData.studentLoan;
-  const hasDebt = totalDebt > 0;
+  // FIXED: Debt calculation - only show debt if total is greater than R100
+  const totalDebt = (userData.creditCardDebt || 0) + 
+                    (userData.personalLoan || 0) + 
+                    (userData.studentLoan || 0);
+  // Only consider debt if it's greater than R100 (ignore rounding errors or tiny amounts)
+  const hasDebt = totalDebt > 100;
   const annualIncome = userData.grossMonthlyIncome * 12;
   const debtToIncomeRatio = annualIncome > 0 && hasDebt ? (totalDebt / annualIncome) * 100 : 0;
   
@@ -138,14 +142,15 @@ function MoneySnapshot() {
   const fuelCost = hasVehicle ? 2500 : 0;
   const mobilityCost = (userData.vehicleFinance || 0) + fuelCost;
   const lifestyleCost = (userData.subscriptions || 0) + (userData.insurance || 0);
-  const estimatedMonthlyDebtPayment = hasDebt ? Math.max(500, totalDebt / 36) : 0;
+  // FIXED: Only calculate monthly payment if hasDebt is true
+  const estimatedMonthlyDebtPayment = hasDebt ? Math.max(500, totalDebt * 0.05) : 0;
   const monthlySavings = userData.monthlySavings || 0;
 
   const pieData = [
     { name: 'Housing', value: housingCost, color: '#0f65c9' },
     ...(mobilityCost > 0 ? [{ name: 'Mobility', value: mobilityCost, color: '#F4A261' }] : []),
     ...(lifestyleCost > 0 ? [{ name: 'Lifestyle', value: lifestyleCost, color: '#00A86B' }] : []),
-    ...(hasDebt && estimatedMonthlyDebtPayment > 0 ? [{ name: 'Debt', value: estimatedMonthlyDebtPayment, color: '#b60232' }] : []),
+    ...(estimatedMonthlyDebtPayment > 0 ? [{ name: 'Debt', value: estimatedMonthlyDebtPayment, color: '#b60232' }] : []),
     ...(monthlySavings > 0 ? [{ name: 'Savings', value: monthlySavings, color: '#ff780f' }] : []),
   ];
 
@@ -273,7 +278,7 @@ function MoneySnapshot() {
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#0f65c9' }}>Housing</span>: Monthly rent or bond payment</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#F4A261' }}>Mobility</span>: Car finance + R2500 fuel (only if you own a car)</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#00A86B' }}>Lifestyle</span>: Subscriptions + insurance</p>
-              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#b60232' }}>Debt</span>: Only appears if you have debt</p>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#b60232' }}>Debt</span>: 5% of total debt or R500 minimum</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#ff780f' }}>Savings</span>: Your monthly savings contribution</p>
             </div>
           )}
@@ -288,7 +293,7 @@ function MoneySnapshot() {
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <ResponsiveContainer width="100%" height={320}>
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} labelLine={true}>
+                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} labelLine={true}>
                       {pieData.map((entry, idx) => (<Cell key={`cell-${idx}`} fill={entry.color} />))}
                     </Pie>
                     <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -345,7 +350,7 @@ function MoneySnapshot() {
                 <div><label>Medical Aid</label><input type="number" name="medicalAid" value={formData.medicalAid} onChange={handleInputChange} min="0" /></div>
                 <div><label>Subscriptions</label><input type="number" name="subscriptions" value={formData.subscriptions} onChange={handleInputChange} min="0" /></div>
                 <div><label>Credit Card Debt</label><input type="number" name="creditCardDebt" value={formData.creditCardDebt} onChange={handleInputChange} min="0" /></div>
-                <div><label>Student Loan</label><input type="number" name="studentLoan" value={formData.studentLoan} onChange={handleInputChange} min="0" /></div>
+                <div><label>Personal Loan</label><input type="number" name="personalLoan" value={formData.personalLoan} onChange={handleInputChange} min="0" /></div>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
@@ -369,8 +374,15 @@ function MoneySnapshot() {
             { name: 'Medical Credit', amount: 400 },
             { name: 'Net Pay', amount: netPay }
           ]} layout="vertical">
-            <XAxis type="number" /><YAxis type="category" dataKey="name" width={120} /><Tooltip formatter={(value) => formatCurrency(value)} />
-            <Bar dataKey="amount"><Cell fill="#F4A261" /><Cell fill="#b60232" /><Cell fill="#00A86B" /><Cell fill="#003366" /></Bar>
+            <XAxis type="number" tickFormatter={(value) => formatCurrency(value).replace('ZAR', 'R')} tick={{ fontSize: 16.5}}/>
+            <YAxis type="category" dataKey="name" width={119.5} tick={{ fontSize: 16.5}}/>
+            <Tooltip formatter={(value) => formatCurrency(value)} />
+            <Bar dataKey="amount">
+              <Cell fill="#F4A261" />
+              <Cell fill="#b60232" />
+              <Cell fill="#00A86B" />
+              <Cell fill="#003366" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
