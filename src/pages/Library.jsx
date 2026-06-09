@@ -22,9 +22,10 @@ function Library() {
     // Money Snapshot terms
     { term: "Net Monthly Pay", definition: "Your take-home pay after PAYE tax and medical aid credits. This is what you actually receive in your bank account each month.", category: "tax" },
     { term: "Medical Tax Credit", definition: "A tax credit for medical aid contributions. Currently R364 per month for the main member and R246 for each dependent.", category: "tax" },
-    { term: "Fixed Costs", definition: "Monthly expenses that stay relatively constant, like rent, bond, insurance, and vehicle finance.", category: "budgeting" },
+    { term: "Fixed Costs", definition: "Monthly expenses that stay relatively constant, like rent, bond, insurance, vehicle finance, and monthly debt payments.", category: "budgeting" },
     { term: "Disposable Income", definition: "Money left after paying all fixed costs. This is what you can use for savings, investments, and discretionary spending.", category: "budgeting" },
-    { term: "Debt-to-Income Ratio", definition: "Total monthly debt payments divided by gross monthly income. Lenders prefer this to be below 40%.", category: "debt" },
+    { term: "Monthly Debt Payment", definition: "The total amount you pay each month toward all your debts, including credit cards, personal loans, student loans, and other debt obligations.", category: "debt" },
+    { term: "Debt-to-Income Ratio", definition: "Your total monthly debt payments divided by your gross monthly income. Lenders prefer this to be below 40%.", category: "debt" },
     
     // Balanced Track - 50/30/20 Rule
     { term: "50/30/20 Rule", definition: "A budgeting framework where 50% of income goes to needs, 30% to wants, and 20% to savings and debt repayment.", category: "budgeting" },

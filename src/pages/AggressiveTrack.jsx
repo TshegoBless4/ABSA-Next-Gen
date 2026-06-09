@@ -16,10 +16,10 @@ function AggressiveTrack() {
 
   const milestones = [
     { id: "milestone1", name: "Max Out TFSA", year: "Year 1", targetDate: "February 2026", icon: <FaChartLine />, description: "Contribute R46,000 to your TFSA", tip: "R46,000/year grows tax-free. Invest in global ETFs." },
-    { id: "milestone2", name: "Open Offshore Account", year: "Year 2", targetDate: "December 2026", icon: <FaGlobe />, description: "Open international investment account", tip: "Use EasyEquities USD. Transfer up to R1M/year offshore." },
-    { id: "milestone3", name: "40% Offshore Allocation", year: "Year 3", targetDate: "December 2027", icon: <FaExchangeAlt />, description: "Achieve 40% offshore allocation", tip: "Diversify across US, Europe, and Emerging Markets." },
-    { id: "milestone4", name: "Direct USD/EUR Exposure", year: "Year 4", targetDate: "December 2028", icon: <FaDollarSign />, description: "Direct USD/EUR investments", tip: "Invest in individual US stocks like Apple, Nvidia." },
-    { id: "milestone5", name: "R1 Million Portfolio", year: "Year 5", targetDate: "December 2029", icon: <FaRocket />, description: "Grow portfolio to R1 million", tip: "Rebalance annually. Consider a Retirement Annuity." },
+    { id: "milestone2", name: "Open Offshore Account", year: "Year 2", targetDate: "December 2027", icon: <FaGlobe />, description: "Open international investment account", tip: "Use EasyEquities USD. Transfer up to R1M/year offshore." },
+    { id: "milestone3", name: "40% Offshore Allocation", year: "Year 3", targetDate: "December 2028", icon: <FaExchangeAlt />, description: "Achieve 40% offshore allocation", tip: "Diversify across US, Europe, and Emerging Markets." },
+    { id: "milestone4", name: "Direct USD/EUR Exposure", year: "Year 4", targetDate: "December 2029", icon: <FaDollarSign />, description: "Direct USD/EUR investments", tip: "Invest in individual US stocks like Apple, Nvidia." },
+    { id: "milestone5", name: "R1 Million Portfolio", year: "Year 5", targetDate: "December 2030", icon: <FaRocket />, description: "Grow portfolio to R1 million", tip: "Rebalance annually. Consider a Retirement Annuity." },
   ];
 
   const toggleTip = (id) => setShowTips(prev => ({ ...prev, [id]: !prev[id] }));

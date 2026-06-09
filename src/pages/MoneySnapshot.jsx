@@ -1,8 +1,8 @@
 // src/pages/MoneySnapshot.jsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
-import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus, FaTrash, FaPen } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaChartLine, FaPiggyBank, FaHome, FaHeartbeat, FaInfoCircle, FaCheckCircle, FaPlus, FaTrash, FaPen, FaCalendarAlt, FaChartLine as FaCompare } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 function MoneySnapshot() {
@@ -16,15 +16,38 @@ function MoneySnapshot() {
   const [showCategoryHelp, setShowCategoryHelp] = useState(false);
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [newGoal, setNewGoal] = useState({ name: '', target: 0, current: 0 });
+  const [showCompare, setShowCompare] = useState(false);
+  const [previousMonthData, setPreviousMonthData] = useState(null);
 
   const formatCurrency = (amount) => new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR', minimumFractionDigits: 0 }).format(amount);
+
+  // Load previous month data on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('previousMonthSnapshot');
+    if (saved) {
+      setPreviousMonthData(JSON.parse(saved));
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
   };
 
+  // Save current data as previous month when editing
   const handleSave = () => {
+    // Save current data as previous month before updating
+    const currentSavingsRate = netPay > 0 ? ((userData.monthlySavings || 0) / netPay) * 100 : 0;
+    const currentSnapshot = {
+      netPay,
+      fixedCosts,
+      available,
+      savingsRate: currentSavingsRate,
+      date: new Date().toISOString()
+    };
+    localStorage.setItem('previousMonthSnapshot', JSON.stringify(currentSnapshot));
+    setPreviousMonthData(currentSnapshot);
+    
     updateUserData(formData);
     setEditMode(false);
   };
@@ -128,35 +151,107 @@ function MoneySnapshot() {
 
   const allGoals = [...defaultGoals, ...getCustomGoals()].filter(goal => goal.target > 0 || goal.current > 0);
 
-  // FIXED: Debt calculation - only show debt if total is greater than R100
-  const totalDebt = (userData.creditCardDebt || 0) + 
-                    (userData.personalLoan || 0) + 
-                    (userData.studentLoan || 0);
-  // Only consider debt if it's greater than R100 (ignore rounding errors or tiny amounts)
-  const hasDebt = totalDebt > 100;
+  // SIMPLIFIED DEBT - Just monthly payment
+  const monthlyDebtPayment = userData.monthlyDebtPayment || 0;
+  const hasMonthlyDebtPayment = monthlyDebtPayment > 0;
   const annualIncome = userData.grossMonthlyIncome * 12;
-  const debtToIncomeRatio = annualIncome > 0 && hasDebt ? (totalDebt / annualIncome) * 100 : 0;
+  // Simple debt-to-income based on monthly payment (annualized)
+  const annualDebtPayment = monthlyDebtPayment * 12;
+  const debtToIncomeRatio = annualIncome > 0 ? (annualDebtPayment / annualIncome) * 100 : 0;
+  const hasDebt = monthlyDebtPayment > 0;
   
   const housingCost = (userData.rent || 0) + (userData.bond || 0);
   const hasVehicle = (userData.vehicleFinance || 0) > 0;
   const fuelCost = hasVehicle ? 2500 : 0;
   const mobilityCost = (userData.vehicleFinance || 0) + fuelCost;
   const lifestyleCost = (userData.subscriptions || 0) + (userData.insurance || 0);
-  // FIXED: Only calculate monthly payment if hasDebt is true
-  const estimatedMonthlyDebtPayment = hasDebt ? Math.max(500, totalDebt * 0.05) : 0;
   const monthlySavings = userData.monthlySavings || 0;
 
+  // PIE DATA - Uses user's actual monthly debt payment
   const pieData = [
     { name: 'Housing', value: housingCost, color: '#0f65c9' },
     ...(mobilityCost > 0 ? [{ name: 'Mobility', value: mobilityCost, color: '#F4A261' }] : []),
     ...(lifestyleCost > 0 ? [{ name: 'Lifestyle', value: lifestyleCost, color: '#00A86B' }] : []),
-    ...(estimatedMonthlyDebtPayment > 0 ? [{ name: 'Debt', value: estimatedMonthlyDebtPayment, color: '#b60232' }] : []),
+    ...(hasMonthlyDebtPayment ? [{ name: 'Debt Payment', value: monthlyDebtPayment, color: '#b60232' }] : []),
     ...(monthlySavings > 0 ? [{ name: 'Savings', value: monthlySavings, color: '#ff780f' }] : []),
   ];
 
   const savingsRate = netPay > 0 ? (monthlySavings / netPay) * 100 : 0;
   const lifestylePercentage = netPay > 0 ? (lifestyleCost / netPay) * 100 : 0;
   
+  // Calculate Health Score (0-100)
+  const calculateHealthScore = () => {
+    if (!netPay || netPay <= 0 || userData.grossMonthlyIncome <= 0) {
+      return 0;
+    }
+    
+    let score = 50;
+    
+    if (lifestylePercentage === 0 || lifestyleCost === 0) {
+      // No change
+    } else if (lifestylePercentage <= 20) {
+      score += 15;
+    } else if (lifestylePercentage <= 30) {
+      score += 5;
+    } else if (lifestylePercentage <= 40) {
+      score -= 10;
+    } else {
+      score -= 20;
+    }
+    
+    if (savingsRate >= 20) {
+      score += 25;
+    } else if (savingsRate >= 15) {
+      score += 15;
+    } else if (savingsRate >= 10) {
+      score += 5;
+    } else if (savingsRate > 0 && savingsRate < 10) {
+      score -= 10;
+    } else if (savingsRate === 0) {
+      score -= 20;
+    }
+    
+    // Debt score based on monthly payment vs income
+    if (!hasDebt) {
+      score += 10;
+    } else if (debtToIncomeRatio <= 20) {
+      score += 5;
+    } else if (debtToIncomeRatio <= 40) {
+      score -= 10;
+    } else if (debtToIncomeRatio <= 60) {
+      score -= 20;
+    } else {
+      score -= 25;
+    }
+    
+    const emergencyTarget = userData.emergencyFundTarget || 0;
+    const emergencyCurrent = userData.emergencyFundCurrent || 0;
+    if (emergencyTarget > 0 && emergencyCurrent >= emergencyTarget) {
+      score += 10;
+    } else if (emergencyTarget > 0 && emergencyCurrent >= emergencyTarget * 0.5) {
+      score += 5;
+    }
+    
+    const investments = userData.investments || 0;
+    if (investments > 100000) {
+      score += 5;
+    } else if (investments > 50000) {
+      score += 3;
+    } else if (investments > 10000) {
+      score += 1;
+    }
+    
+    return Math.max(0, Math.min(100, score));
+  };
+  
+  const healthScore = calculateHealthScore();
+  const getHealthScoreColor = () => {
+    if (healthScore >= 80) return '#00A86B';
+    if (healthScore >= 60) return '#F4A261';
+    if (healthScore >= 40) return '#F4A261';
+    return '#b60232';
+  };
+
   const getLifestyleRating = () => {
     if (lifestylePercentage > 30) return { text: 'High', color: '#b60232', suggestion: 'Consider reducing discretionary spending.' };
     if (lifestylePercentage > 20) return { text: 'Moderate', color: '#F4A261', suggestion: 'Your lifestyle spending is reasonable.' };
@@ -175,9 +270,9 @@ function MoneySnapshot() {
   const getDebtRating = () => {
     if (!annualIncome || annualIncome <= 0) return { text: 'No Income', color: '#acacac', suggestion: 'Enter your income to see debt insights.' };
     if (!hasDebt) return { text: 'Debt-Free', color: '#00A86B', suggestion: 'Great job! No debt to worry about.' };
-    if (debtToIncomeRatio <= 20) return { text: 'Healthy', color: '#00A86B', suggestion: 'Your debt levels are well-managed.' };
-    if (debtToIncomeRatio <= 40) return { text: 'Moderate', color: '#F4A261', suggestion: 'Monitor your debt closely.' };
-    return { text: 'High', color: '#b60232', suggestion: 'Prioritise paying down debt before aggressive investing.' };
+    if (debtToIncomeRatio <= 20) return { text: 'Healthy', color: '#00A86B', suggestion: 'Your debt payments are well within your means.' };
+    if (debtToIncomeRatio <= 40) return { text: 'Moderate', color: '#F4A261', suggestion: 'Monitor your debt payments closely.' };
+    return { text: 'High', color: '#b60232', suggestion: 'Your debt payments are high. Consider debt consolidation or refinancing.' };
   };
 
   const lifestyleRating = getLifestyleRating();
@@ -200,22 +295,109 @@ function MoneySnapshot() {
 
   const getDebtNudge = () => {
     if (!hasDebt) return null;
-    if (debtToIncomeRatio > 40) return `Your debt-to-income ratio is ${debtToIncomeRatio.toFixed(0)}%. Consider accelerating debt payments.`;
+    if (debtToIncomeRatio > 40) return `Your debt payments are ${debtToIncomeRatio.toFixed(0)}% of your income. Consider paying down debt faster.`;
     return null;
   };
 
+  const getChangeIndicator = (current, previous) => {
+    if (!previous || previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    if (change > 5) return { icon: '▲', color: '#b60232', text: `+${change.toFixed(0)}%` };
+    if (change < -5) return { icon: '▼', color: '#00A86B', text: `${change.toFixed(0)}%` };
+    return { icon: '•', color: '#acacac', text: 'Steady' };
+  };
+
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <FaCalendarAlt size={16} color="#acacac" />
+            <p style={{ color: '#acacac', fontSize: '13px', margin: 0 }}>Your snapshot at {formattedDate}</p>
+          </div>
           <h1 style={{ marginBottom: '4px' }}>Money Snapshot</h1>
           <p style={{ color: '#acacac', fontSize: '14px' }}>Your complete financial overview at a glance</p>
         </div>
-        <button onClick={() => editMode ? handleSave() : setEditMode(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {editMode ? <><FaSave /> Save Changes</> : <><FaEdit /> Edit My Numbers</>}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={() => setShowCompare(!showCompare)} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
+            <FaCompare size={14} /> {showCompare ? 'Hide Comparison' : 'Compare to Last Month'}
+          </button>
+          <button onClick={() => editMode ? handleSave() : setEditMode(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {editMode ? <><FaSave /> Save Changes</> : <><FaEdit /> Edit My Numbers</>}
+          </button>
+        </div>
       </div>
 
+      {/* Health Score Card */}
+      <div className="card" style={{ marginBottom: '24px', background: `linear-gradient(135deg, ${getHealthScoreColor()}20 0%, #1a1a1a 100%)`, borderLeft: `4px solid ${getHealthScoreColor()}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <p style={{ color: '#acacac', fontSize: '12px' }}>Your Financial Health Score</p>
+            <p style={{ fontSize: '48px', fontWeight: 'bold', color: getHealthScoreColor() }}>{healthScore}<span style={{ fontSize: '20px', color: '#acacac' }}>/100</span></p>
+            <p style={{ fontSize: '12px', color: '#acacac' }}>
+              {healthScore === 0 ? 'Enter your income to see your health score.' :
+               healthScore >= 80 ? 'Excellent! You\'re on the right track.' :
+               healthScore >= 60 ? 'Good, but room for improvement.' :
+               healthScore >= 40 ? 'Needs attention. Review the nudges below.' :
+               'Critical. Take action on the recommendations below.'}
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <FaHeartbeat size={48} color={getHealthScoreColor()} opacity={0.5} />
+          </div>
+        </div>
+      </div>
+
+      {/* Compare to Last Month Section */}
+      {showCompare && previousMonthData && (
+        <div className="card" style={{ marginBottom: '24px', backgroundColor: '#00336620', borderLeft: '4px solid #F4A261' }}>
+          <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>vs Last Month</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            <div>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>Net Pay</p>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{formatCurrency(netPay)}</p>
+              {getChangeIndicator(netPay, previousMonthData.netPay) && (
+                <p style={{ fontSize: '11px', color: getChangeIndicator(netPay, previousMonthData.netPay).color }}>
+                  {getChangeIndicator(netPay, previousMonthData.netPay).icon} {getChangeIndicator(netPay, previousMonthData.netPay).text}
+                </p>
+              )}
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>Fixed Costs</p>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{formatCurrency(fixedCosts)}</p>
+              {getChangeIndicator(fixedCosts, previousMonthData.fixedCosts) && (
+                <p style={{ fontSize: '11px', color: getChangeIndicator(fixedCosts, previousMonthData.fixedCosts).color }}>
+                  {getChangeIndicator(fixedCosts, previousMonthData.fixedCosts).icon} {getChangeIndicator(fixedCosts, previousMonthData.fixedCosts).text}
+                </p>
+              )}
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>Disposable Income</p>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{formatCurrency(available)}</p>
+              {getChangeIndicator(available, previousMonthData.available) && (
+                <p style={{ fontSize: '11px', color: getChangeIndicator(available, previousMonthData.available).color }}>
+                  {getChangeIndicator(available, previousMonthData.available).icon} {getChangeIndicator(available, previousMonthData.available).text}
+                </p>
+              )}
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>Savings Rate</p>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{savingsRate.toFixed(0)}%</p>
+              {previousMonthData.savingsRate && getChangeIndicator(savingsRate, previousMonthData.savingsRate) && (
+                <p style={{ fontSize: '11px', color: getChangeIndicator(savingsRate, previousMonthData.savingsRate).color }}>
+                  {getChangeIndicator(savingsRate, previousMonthData.savingsRate).icon} {getChangeIndicator(savingsRate, previousMonthData.savingsRate).text}
+                </p>
+              )}
+            </div>
+          </div>
+          <p style={{ fontSize: '10px', color: '#acacac', marginTop: '12px' }}>Based on snapshot from {previousMonthData.date ? new Date(previousMonthData.date).toLocaleDateString('en-ZA') : 'last month'}</p>
+        </div>
+      )}
+
+      {/* Top Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '32px' }}>
         <div className="card" style={{ background: 'linear-gradient(135deg, #003366 0%, #002244 100%)', border: 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -243,6 +425,7 @@ function MoneySnapshot() {
         </div>
       </div>
 
+      {/* Financial Health Dashboard */}
       <div className="card" style={{ marginBottom: '24px' }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FaHeartbeat /> Financial Health Dashboard</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginTop: '16px' }}>
@@ -264,6 +447,7 @@ function MoneySnapshot() {
         </div>
       </div>
 
+      {/* Where It Goes & Fixed Costs */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -278,7 +462,7 @@ function MoneySnapshot() {
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#0f65c9' }}>Housing</span>: Monthly rent or bond payment</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#F4A261' }}>Mobility</span>: Car finance + R2500 fuel (only if you own a car)</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#00A86B' }}>Lifestyle</span>: Subscriptions + insurance</p>
-              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#b60232' }}>Debt</span>: 5% of total debt or R500 minimum</p>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#b60232' }}>Debt Payment</span>: Your actual monthly debt payment (credit cards, loans, etc.)</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#ff780f' }}>Savings</span>: Your monthly savings contribution</p>
             </div>
           )}
@@ -293,7 +477,7 @@ function MoneySnapshot() {
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <ResponsiveContainer width="100%" height={320}>
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} labelLine={true}>
+                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} labelLine={true}>
                       {pieData.map((entry, idx) => (<Cell key={`cell-${idx}`} fill={entry.color} />))}
                     </Pie>
                     <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -328,7 +512,7 @@ function MoneySnapshot() {
               </div>
             ) : (
               <>
-                <p style={{ fontSize: '18px' }}><strong>{netPay > 0 ? formatCurrency(userData.grossMonthlyIncome) : 'Not set'}</strong> / month</p>
+                <p style={{ fontSize: '18px' }}><strong>{userData.grossMonthlyIncome > 0 ? formatCurrency(userData.grossMonthlyIncome) : 'Not set'}</strong> / month</p>
                 {monthlySavings > 0 && <p style={{ fontSize: '14px', color: '#00A86B' }}>Monthly Savings: {formatCurrency(monthlySavings)}</p>}
               </>
             )}
@@ -349,15 +533,14 @@ function MoneySnapshot() {
                 <div><label>Insurance</label><input type="number" name="insurance" value={formData.insurance} onChange={handleInputChange} min="0" /></div>
                 <div><label>Medical Aid</label><input type="number" name="medicalAid" value={formData.medicalAid} onChange={handleInputChange} min="0" /></div>
                 <div><label>Subscriptions</label><input type="number" name="subscriptions" value={formData.subscriptions} onChange={handleInputChange} min="0" /></div>
-                <div><label>Credit Card Debt</label><input type="number" name="creditCardDebt" value={formData.creditCardDebt} onChange={handleInputChange} min="0" /></div>
-                <div><label>Personal Loan</label><input type="number" name="personalLoan" value={formData.personalLoan} onChange={handleInputChange} min="0" /></div>
+                <div><label>Monthly Debt Payment </label><input type="number" name="monthlyDebtPayment" value={formData.monthlyDebtPayment || 0} onChange={handleInputChange} min="0" placeholder="R0" /></div>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                 <p><strong>Housing:</strong> {housingCost > 0 ? formatCurrency(housingCost) : '—'}</p>
                 <p><strong>Mobility:</strong> {mobilityCost > 0 ? formatCurrency(mobilityCost) : '—'}</p>
                 <p><strong>Lifestyle:</strong> {lifestyleCost > 0 ? formatCurrency(lifestyleCost) : '—'}</p>
-                <p><strong>Debt:</strong> {hasDebt ? formatCurrency(estimatedMonthlyDebtPayment) : <span style={{ color: '#00A86B' }}>No debt</span>}</p>
+                <p><strong>Debt Payment:</strong> {hasMonthlyDebtPayment ? formatCurrency(monthlyDebtPayment) : <span style={{ color: '#00A86B' }}>No debt payment set</span>}</p>
                 <p><strong>Monthly Savings:</strong> {monthlySavings > 0 ? formatCurrency(monthlySavings) : '—'}</p>
               </div>
             )}
@@ -365,6 +548,7 @@ function MoneySnapshot() {
         </div>
       </div>
 
+      {/* Income Waterfall Chart */}
       <div className="card">
         <h2>Income Waterfall</h2>
         <ResponsiveContainer width="100%" height={280}>
@@ -387,6 +571,7 @@ function MoneySnapshot() {
         </ResponsiveContainer>
       </div>
 
+      {/* Goals Section */}
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h2 style={{ marginBottom: '0' }}>Your Goals</h2>
@@ -478,6 +663,7 @@ function MoneySnapshot() {
         )}
       </div>
 
+      {/* Smart Nudges */}
       <div className="card" style={{ background: "linear-gradient(135deg, #16110d 0%, #2d2729 85%)", marginTop: '24px' }}>
         <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>Smart Nudges</h3>
         

@@ -13,15 +13,13 @@ const getDefaultUserData = () => ({
   medicalAid: 0,
   subscriptions: 0,
   monthlySavings: 0,
+  monthlyDebtPayment: 0,  // User's actual monthly debt payment
   emergencyFundTarget: 0,
   emergencyFundCurrent: 0,
   propertyDepositTarget: 0,
   propertyDepositCurrent: 0,
   holidayTarget: 0,
   holidayCurrent: 0,
-  studentLoan: 0,
-  creditCardDebt: 0,
-  personalLoan: 0,
   currentSavings: 0,
   raValue: 0,
   investments: 0,
@@ -204,7 +202,7 @@ export function AuthProvider({ children }) {
   const calculateFixedCosts = () => {
     return (userData.rent || 0) + (userData.vehicleFinance || 0) + 
            (userData.insurance || 0) + (userData.medicalAid || 0) + 
-           (userData.subscriptions || 0);
+           (userData.subscriptions || 0) + (userData.monthlyDebtPayment || 0);
   };
 
   const value = {
