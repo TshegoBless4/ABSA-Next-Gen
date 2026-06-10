@@ -460,8 +460,8 @@ function MoneySnapshot() {
             <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#2d2729', borderRadius: '8px' }}>
               <p style={{ fontSize: '12px', color: '#acacac', marginBottom: '8px' }}><strong>How categories are calculated:</strong></p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#0f65c9' }}>Housing</span>: Monthly rent or bond payment</p>
-              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#F4A261' }}>Mobility</span>: Car finance + R2500 fuel (only if you own a car)</p>
-              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#00A86B' }}>Lifestyle</span>: Subscriptions + insurance</p>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#F4A261' }}>Mobility</span>: Total monthly vehicle expenses (finance, fuel, maintenance, etc.)</p>
+              <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#00A86B' }}>Lifestyle</span>: Life maintenance (food, clothing, electricity, WiFi, subscriptions) + Insurance + Medical Aid</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#b60232' }}>Debt Payment</span>: Your actual monthly debt payment (credit cards, loans, etc.)</p>
               <p style={{ fontSize: '11px', color: '#acacac' }}>• <span style={{ color: '#ff780f' }}>Savings</span>: Your monthly savings contribution</p>
             </div>
